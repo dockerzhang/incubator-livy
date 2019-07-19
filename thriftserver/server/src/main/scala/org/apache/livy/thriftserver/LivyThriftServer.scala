@@ -20,6 +20,7 @@ package org.apache.livy.thriftserver
 import java.security.PrivilegedExceptionAction
 
 import org.apache.hadoop.security.UserGroupInformation
+import org.apache.hadoop.security.UserGroupInformation.AuthenticationMethod
 
 import org.apache.livy.{LivyConf, Logging}
 import org.apache.livy.server.AccessManager
@@ -54,7 +55,8 @@ object LivyThriftServer extends Logging {
               livySessionManager,
               sessionStore,
               accessManager)
-            if (UserGroupInformation.isSecurityEnabled) {
+            if (UserGroupInformation.isSecurityEnabled &&
+              !UserGroupInformation.isAuthenticationEnabled( AuthenticationMethod.TBDS)) {
               ugi.doAs(new PrivilegedExceptionAction[Unit] {
                 override def run(): Unit = {
                   doStart(livyConf)

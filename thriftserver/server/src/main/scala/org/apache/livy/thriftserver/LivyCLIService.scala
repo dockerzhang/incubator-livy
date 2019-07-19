@@ -23,6 +23,7 @@ import java.util.concurrent.{CancellationException, ExecutionException, TimeoutE
 import javax.security.auth.login.LoginException
 
 import org.apache.hadoop.security.{SecurityUtil, UserGroupInformation}
+import org.apache.hadoop.security.UserGroupInformation.AuthenticationMethod
 import org.apache.hive.service.ServiceException
 import org.apache.hive.service.cli._
 import org.apache.hive.service.rpc.thrift.{TOperationHandle, TProtocolVersion}
@@ -49,7 +50,8 @@ class LivyCLIService(server: LivyThriftServer)
     defaultFetchRows = livyConf.getInt(LivyConf.THRIFT_RESULTSET_DEFAULT_FETCH_SIZE)
     maxTimeout = livyConf.getTimeAsMs(LivyConf.THRIFT_LONG_POLLING_TIMEOUT)
     //  If the hadoop cluster is secure, do a kerberos login for the service from the keytab
-    if (UserGroupInformation.isSecurityEnabled) {
+    if (UserGroupInformation.isSecurityEnabled &&
+      !UserGroupInformation.isAuthenticationEnabled( AuthenticationMethod.TBDS)) {
       try {
         serviceUGI = UserGroupInformation.getCurrentUser
       } catch {

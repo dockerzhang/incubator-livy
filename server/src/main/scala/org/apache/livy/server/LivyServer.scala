@@ -28,6 +28,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 import org.apache.hadoop.security.{SecurityUtil, UserGroupInformation}
+import org.apache.hadoop.security.UserGroupInformation.AuthenticationMethod
 import org.apache.hadoop.security.authentication.server._
 import org.eclipse.jetty.servlet.FilterHolder
 import org.scalatra.{NotFound, ScalatraServlet}
@@ -100,7 +101,8 @@ class LivyServer extends Logging {
       _thriftServerFactory = Some(ThriftServerFactory.getInstance)
     }
 
-    if (UserGroupInformation.isSecurityEnabled) {
+    if (UserGroupInformation.isSecurityEnabled &&
+      !UserGroupInformation.isAuthenticationEnabled( AuthenticationMethod.TBDS)) {
       // If Hadoop security is enabled, run kinit periodically. runKinit() should be called
       // before any Hadoop operation, otherwise Kerberos exception will be thrown.
       executor = Executors.newScheduledThreadPool(1,
